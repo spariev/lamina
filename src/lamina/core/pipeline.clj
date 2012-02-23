@@ -9,7 +9,7 @@
 (ns ^{:skip-wiki true}
   lamina.core.pipeline
   (:use
-    [clojure.contrib.def :only (defmacro- defvar)]
+    [clojure.core.incubator :only (defmacro-)]
     [lamina.core.channel]
     [clojure.pprint])
   (:require
@@ -23,9 +23,9 @@
 
 (def instrument-exceptions false)
 
-(def *inside-pipeline?* false)
+(def ^:dynamic *inside-pipeline?* false)
 
-(def *current-executor* nil)
+(def ^:dynamic *current-executor* nil)
 
 (defmacro with-executor [executor & body]
   `(let [f# (fn [] ~@body)]
@@ -121,7 +121,7 @@
 
 (defn restart
   "A special form of redirect, which simply restarts the current pipeline.  'value'
-   describe sthe initial value passed into the first stage of the current pipeline,
+   describe sthe initial value passed into the first stage of the current pipeline
    and defaults to the value that was previously passed into the first stage."
   ([]
      (restart ::initial))
@@ -167,20 +167,20 @@
 	 (cond
 	   (< 100 err-count)
 	   (error! result (Exception. "Error loop detected in pipeline."))
-	   
+
 	   (redirect? value)
 	   (redirect-recur value pipeline initial-value err-count)
-	   
+
 	   (result-channel? value)
 	   (let [ch ^ResultChannel value]
 	     (cond
 	       (not= ::none (dequeue (.error ch) ::none))
 	       (if-let [redirect (handle-error pipeline ch result)]
 		 (redirect-recur redirect pipeline initial-value (inc err-count)))
-	       
+
 	       (not= ::none (dequeue (.success ch) ::none))
 	       (recur fns pipeline initial-value (dequeue (.success ch) nil) 0)
-	       
+
 	       :else
 	       (let [bindings (get-thread-bindings)]
 		 (receive (poll-result value)
@@ -198,11 +198,11 @@
 				      pipeline fns
 				      value initial-value
 				      result)))))))))
-	   
+
 	   (empty? fns)
 	   (when-not (has-result? result)
 	     (success! result value))
-	   
+
 	   :else
 	   (let [f (first fns)]
 	     (let [[success val] (try
