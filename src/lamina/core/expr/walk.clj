@@ -14,9 +14,9 @@
 
 (declare walk-exprs)
 
-(def *recur-point* nil)
-(def *final-walk* false)
-(def *special-walk-handlers* {})
+(def ^:dynamic *recur-point* nil)
+(def ^:dynamic *final-walk* false)
+(def ^:dynamic *special-walk-handlers* {})
 
 (defn walk-bindings [f bindings]
   (vec
@@ -80,21 +80,21 @@
 			      (contains? *special-walk-handlers* (-> x first name symbol)))
 			    ((*special-walk-handlers* (-> x first name symbol))
 			     (cons (first x) (map f* (rest x))))
-			    
+
 			    (first= x 'fn 'fn*)
 			    (walk-fn-form f x)
-			    
+
 			    (first= x 'let 'let*)
 			    (walk-special-form f x)
-			    
+
 			    (first= x 'loop 'loop*)
 			    (walk-loop-form f x)
-			    
+
 			    (first= x 'chunk-append)
 			    `(chunk-append
 			       (await-result ~(second x))
 			       (await-result ~(->> x rest second (walk-exprs f))))
-			    
+
 			    (first= x 'catch)
 			    (concat (take 3 x) (map f* (drop 3 x)))
 
@@ -104,8 +104,8 @@
 			      `(redirect (deref ~*recur-point*) [~@(map f* (rest x))]))
 
 			    (apply first= x special-forms)
-			    (list* (first x) (map f* (rest x)))			   
-			    
+			    (list* (first x) (map f* (rest x)))
+
 			    :else
 			    (f (map f* x)))
 	  :else (f x))))))
