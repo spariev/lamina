@@ -12,7 +12,7 @@
     [lamina core connections trace]
     [lamina.core.pipeline :only (success-result error-result)])
   (:require
-   [clojure.contrib.logging :as log])
+   [clojure.tools.logging :as log])
   (:import java.util.concurrent.TimeoutException))
 
 ;;;
@@ -113,7 +113,7 @@
   (simple-response client 1000)
   (simple-response pipelined-client 1000)
   (simple-response (fn [& args] (client-pool 1 #(apply client args)))))
- 
+
 (defn dropped-connection [client-fn]
   (with-server simple-echo-server
     (let [f (client-fn #(connect) {:description "dropped-connection"})]
@@ -171,7 +171,7 @@
                          (run-pipeline
                            (f x 1e5)
                            :error-handler (fn [_])
-                           #(do 
+                           #(do
                               #_(when (zero? (rem % 100))
                                 (println %))
                               %))))
@@ -181,7 +181,7 @@
         (finally
 	  (reset! continue false)
 	  (close-connection f))))))
-    
+
 (deftest test-keeps-on-working-after-a-timed-out-request
   (testing "with the connection initially disconnected"
     (works-after-a-timed-out-request pipelined-client true)
@@ -234,7 +234,7 @@
   (with-handler (fn [_ _] (throw exception)) {:include-request true}
     (enqueue ch 1 2)
     (is (= [{:request 1, :response exception} {:request 2, :response exception}] (channel-seq ch))))
-  
+
   (with-handler (fn [_ _] (run-pipeline nil :error-handler (fn [_]) (fn [_] (throw exception)))) {:include-request true}
     (enqueue ch 1 2)
     (is (= [{:request 1, :response exception} {:request 2, :response exception}] (channel-seq ch)))))

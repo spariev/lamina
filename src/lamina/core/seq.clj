@@ -10,7 +10,7 @@
   lamina.core.seq
   (:use
     [lamina.core channel pipeline utils]
-    [clojure.contrib.generic.functor])
+    [clojure.algo.generic.functor])
   (:require
     [lamina.core.observable :as o]
     [lamina.core.queue :as q])
@@ -35,12 +35,12 @@
   "Creates a lazy-seq which consumes messages from the channel.  Only elements
    which are realized will be consumes.
 
-   (take 1 (lazy-channel-seq ch)) will only take a single message from the channel,
+   (take 1 (lazy-channel-seq ch)) will only take a single message from the channel
    and no more.  If there are no messages in the channel, execution will halt until
    a message is enqueued.
 
    'timeout' controls how long (in ms) the sequence will wait for each element.  If
-   the timeout is exceeded or the channel is closed, the sequence will end.  By default,
+   the timeout is exceeded or the channel is closed, the sequence will end.  By default
    the sequence will never time out."
   ([ch]
      (lazy-channel-seq ch -1))
@@ -109,10 +109,10 @@
     (cond
       (drained? ch)
       false
-      
+
       (constant-channel? ch)
       (apply receive ch callbacks)
-      
+
       :else
       (let [distributor (-> ch queue q/distributor)
 	    send-to-callbacks (fn [msgs]
@@ -120,7 +120,7 @@
 				  (doseq [c callbacks]
 				    (c msg))))]
 	(o/lock-observable ^Observable distributor
-	  (when (closed? ch) 
+	  (when (closed? ch)
 	    (send-to-callbacks
 	      (butlast
 		(sample-queue ch
@@ -153,7 +153,7 @@
     (cond
       (drained? source)
       false
-      
+
       (constant-channel? source)
       (do
 	(receive source
@@ -162,9 +162,9 @@
 	       (when-not (empty? msgs)
 		 (enqueue dst (first msgs))))))
 	true)
-      
+
       :else
-      
+
       (let [distributor (-> source queue q/distributor)
 	    send-to-destinations (fn [msgs]
 				   (doseq [[dst f] destination-function-map]

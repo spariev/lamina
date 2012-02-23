@@ -12,9 +12,9 @@
     [lamina.core.channel :only (listen)])
   (:use
     [clojure.test]
-    [clojure.contrib.def]
+    [clojure.core.incubator]
     [clojure.walk]
-    [clojure.contrib.combinatorics]))
+    [clojure.math.combinatorics]))
 
 ;;
 
@@ -30,7 +30,7 @@
       (catch Exception e
 	(.printStackTrace e)))))
 
-(declare callback)
+(declare ^:dynamic callback)
 
 (defmacro output-of [f & body]
   `(let [coll# (atom [])]
@@ -135,7 +135,7 @@
       (let [watch (atom false)
 	    latch (promise)]
 	(listen ch (fn [msg]
-		     (when (compare-and-set! watch false true) 
+		     (when (compare-and-set! watch false true)
 		       [true (fn [msg]
 			       (swap! coll conj msg)
 			       (deliver latch nil))])))
@@ -437,7 +437,7 @@
        (do
 	 (siphon fchan output-channel)
          (on-drained fchan
-	   (fn [] 
+	   (fn []
 	     (enqueue output-channel channel-end-marker)
 	     (priority-compose-channels rchans channel-end-marker output-channel))))
        (close output-channel))

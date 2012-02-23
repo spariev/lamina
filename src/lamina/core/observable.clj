@@ -11,7 +11,7 @@
   (:use
     [clojure.walk])
   (:require
-    [clojure.contrib.logging :as log])
+    [clojure.tools.logging :as log])
   (:import
     [java.util.concurrent
      ScheduledThreadPoolExecutor
@@ -185,7 +185,7 @@
       (do
 	(doseq [o (vals m)]
 	  (on-message o [@val]))
-	true) 
+	true)
       merge m))
   (unsubscribe [_ ks]
     (safe-modify-observers observers (not= ::empty @val)

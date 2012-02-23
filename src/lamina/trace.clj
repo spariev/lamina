@@ -11,7 +11,7 @@
     [lamina.core channel seq pipeline]
     potemkin)
   (:require
-    [clojure.contrib.logging :as log]
+    [clojure.tools.logging :as log]
     [lamina.trace.core :as trace]))
 
 ;;;
